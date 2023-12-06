@@ -17,10 +17,10 @@ def parse_story():
     user_story = data['story']
     
     # Perform spell check
-    spell_checked_story = spell_check(user_story)
+   # spell_checked_story = spell_check(user_story)
 
     # Process the text with SpaCy
-    doc = nlp(spell_checked_story)
+  #  doc = nlp(spell_checked_story)
 
     # Process the text with SpaCy
     doc = nlp(user_story)
