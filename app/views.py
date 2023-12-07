@@ -16,7 +16,6 @@ def parse_story():
     data = request.json
     user_story = data['story']
     
-    # Process the text with SpaCy
     doc = nlp(user_story)
     nouns = [token.text for token in doc if token.pos_ == 'NOUN']
     verbs = [token.text for token in doc if token.pos_ == 'VERB']
@@ -24,7 +23,6 @@ def parse_story():
         "nouns": nouns,
         "verbs": verbs
     }
-    # Return the response in JSON format
     return jsonify(response)
     
 
@@ -40,7 +38,6 @@ def spell_check():
 def spell_check_text(text):
 
     words = text.split()
-    # Perform spell check and get corrected words
     corrected_words = [spell.correction(word) for word in words]
     corrected_text = ' '.join(corrected_words)
 
