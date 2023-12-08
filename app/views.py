@@ -22,7 +22,6 @@ def find_associated_verbs(doc, main_noun_token):
                 verb_phrase = create_verb_phrase(token, verb_lemma)
                 verb_phrases.add(verb_phrase)
             else:
-                # If lemma is not valid, use the original form of the verb
                 verb_phrases.add(token.text)
 
     return list(verb_phrases)
@@ -32,7 +31,6 @@ def create_verb_phrase(verb_token, verb_lemma):
     # Check for a direct object or a subject complement
     for child in verb_token.children:
         if child.dep_ in ['dobj', 'attr', 'acomp']:
-            # Formulate the phrase
             phrase = verb_lemma + ' ' + child.text
             return phrase
 
