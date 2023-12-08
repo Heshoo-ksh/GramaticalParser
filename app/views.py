@@ -39,7 +39,12 @@ def parse_story():
         # Second pass: Collect associations avoiding duplicates
         for token in doc:
             if token.pos_ == 'VERB' and (token.head.text == main_noun_obj.noun or main_noun_obj.noun in [ancestor.text for ancestor in token.ancestors]):
-                main_noun_obj.add_associated_verb(token.lemma_)
+                verb_lemma = token.lemma_
+                # Use SpaCy's vocabulary to check if lemma is a valid English word
+                if verb_lemma in nlp.vocab:
+                    main_noun_obj.add_associated_verb(token.lemma_)
+                else:
+                    main_noun_obj.add_associated_verb(token.text)
             elif token.pos_ == 'NOUN' and token.text.lower() != main_noun_obj.noun.lower():
                 if not any(token.text.lower() in cn for cn in compound_nouns):
                     individual_nouns.add(token.text.lower())
