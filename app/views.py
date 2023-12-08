@@ -39,10 +39,6 @@ def create_verb_phrase(verb_token, verb_lemma):
     # Default to just the verb lemma if no associated object/subject complement is found
     return verb_lemma
 
-
-
-
-
 def find_associated_nouns(doc, main_noun_token, compound_nouns):
     nouns = set()
     for token in doc:
@@ -67,34 +63,42 @@ def filter_nouns(individual_nouns, compound_nouns):
             filtered_nouns.add(noun)
     return list(filtered_nouns)
 
+
 def find_main_noun(doc, main_noun_input):
-    # Attempt to find the main noun as provided in the input
-    main_noun_input = spell_check_word(main_noun_input)
+    main_noun_input = main_noun_input.strip().lower()
 
-    for token in doc:
-        if token.text.lower() == main_noun_input.lower() and token.pos_ == 'NOUN':
-            return token
 
-    # Fallback strategy: Use PhraseMatcher to find a similar noun
-    matcher = PhraseMatcher(nlp.vocab, attr='LOWER')
-    patterns = [nlp.make_doc(main_noun_input)]
-    matcher.add('MainNounPattern', patterns)
-    matches = matcher(doc)
-    
-    if matches:
-        match_id, start, end = matches[0]
-        return doc[start:end]
+    if main_noun_input:
+        main_noun_input = spell_check_word(main_noun_input)
 
-    # Additional fallback: Use the most frequently mentioned noun
+        # Attempt to find the main noun as provided in the input
+        for token in doc:
+            if token.text.lower() == main_noun_input and token.pos_ == 'NOUN':
+                return token
+
+        # Fallback strategy: Use PhraseMatcher to find a similar noun
+        matcher = PhraseMatcher(nlp.vocab, attr='LOWER')
+        patterns = [nlp.make_doc(main_noun_input)]
+        matcher.add('MainNounPattern', patterns)
+        matches = matcher(doc)
+        
+        if matches:
+            _, start, end = matches[0]
+            return doc[start:end]
+
+    # Additional fallback: Use the most frequently mentioned noun (excluding pronouns)
     noun_counts = {}
     for token in doc:
         if token.pos_ == 'NOUN':
-            noun_counts[token.text] = noun_counts.get(token.text, 0) + 1
+            noun_counts[token.text.lower()] = noun_counts.get(token.text.lower(), 0) + 1
     if noun_counts:
         main_noun = max(noun_counts, key=noun_counts.get)
-        return next(token for token in doc if token.text == main_noun)
+        return next(token for token in doc if token.text.lower() == main_noun)
 
     return None
+
+
+
 
 @app.route('/parse', methods=['POST'])
 def parse_story():
