@@ -14,14 +14,28 @@ def is_valid_english_word(word):
     return word.lower() in set(nltk.corpus.words.words())
 
 def find_associated_verbs(doc, main_noun_token):
-    verbs = set()
+    verb_phrases = set()
     for token in doc:
-        if token.pos_ == 'VERB' and (token.head == main_noun_token or main_noun_token in token.ancestors):
-            if is_valid_english_word(token.lemma_):
-                verbs.add(token.lemma_)  
+        if token.pos_ == 'VERB':
+            verb_lemma = token.lemma_
+            if is_valid_english_word(verb_lemma):
+                verb_phrase = create_verb_phrase(token, verb_lemma)
+                verb_phrases.add(verb_phrase)
             else:
-                verbs.add(token.text)
-    return list(verbs)
+                verb_phrases.add(token.text)
+
+    return list(verb_phrases)
+
+def create_verb_phrase(verb_token, verb_lemma):
+
+    # Check for a direct object or a subject complement
+    for child in verb_token.children:
+        if child.dep_ in ['dobj', 'attr', 'acomp']:
+            phrase = verb_lemma + ' ' + child.text
+            return phrase
+
+    # Default to just the verb lemma if no associated object/subject complement is found
+    return verb_lemma
 
 def find_associated_nouns(doc, main_noun_token, compound_nouns):
     nouns = set()
@@ -49,33 +63,39 @@ def filter_nouns(individual_nouns, compound_nouns):
 
 
 def find_main_noun(doc, main_noun_input):
-    # Attempt to find the main noun as provided in the input
-    main_noun_input = spell_check_word(main_noun_input)
+    main_noun_input = main_noun_input.strip().lower()
 
-    for token in doc:
-        if token.text.lower() == main_noun_input.lower() and token.pos_ == 'NOUN':
-            return token
 
-    # Fallback strategy: Use PhraseMatcher to find a similar noun
-    matcher = PhraseMatcher(nlp.vocab, attr='LOWER')
-    patterns = [nlp.make_doc(main_noun_input)]
-    matcher.add('MainNounPattern', patterns)
-    matches = matcher(doc)
-    
-    if matches:
-        match_id, start, end = matches[0]
-        return doc[start:end]
+    if main_noun_input:
+        main_noun_input = spell_check_word(main_noun_input)
 
-    # Additional fallback: Use the most frequently mentioned noun
+        # Attempt to find the main noun as provided in the input
+        for token in doc:
+            if token.text.lower() == main_noun_input and token.pos_ == 'NOUN':
+                return token
+
+        # Fallback strategy: Use PhraseMatcher to find a similar noun
+        matcher = PhraseMatcher(nlp.vocab, attr='LOWER')
+        patterns = [nlp.make_doc(main_noun_input)]
+        matcher.add('MainNounPattern', patterns)
+        matches = matcher(doc)
+        
+        if matches:
+            _, start, end = matches[0]
+            return doc[start:end]
+
+    # Additional fallback: Use the most frequently mentioned noun (excluding pronouns)
     noun_counts = {}
     for token in doc:
         if token.pos_ == 'NOUN':
-            noun_counts[token.text] = noun_counts.get(token.text, 0) + 1
+            noun_counts[token.text.lower()] = noun_counts.get(token.text.lower(), 0) + 1
     if noun_counts:
         main_noun = max(noun_counts, key=noun_counts.get)
-        return next(token for token in doc if token.text == main_noun)
+        return next(token for token in doc if token.text.lower() == main_noun)
 
     return None
+
+
 
 
 @app.route('/parse', methods=['POST'])
