@@ -50,6 +50,8 @@ def filter_nouns(individual_nouns, compound_nouns):
 
 def find_main_noun(doc, main_noun_input):
     # Attempt to find the main noun as provided in the input
+    main_noun_input = spell_check_word(main_noun_input)
+
     for token in doc:
         if token.text.lower() == main_noun_input.lower() and token.pos_ == 'NOUN':
             return token
@@ -127,6 +129,9 @@ def spell_check_text(text):
     corrected_text = ' '.join(corrected_words)
 
     return corrected_text
+
+def spell_check_word(word):
+    return spell.correction(word)
 
 @app.route('/')
 def hello_world():
