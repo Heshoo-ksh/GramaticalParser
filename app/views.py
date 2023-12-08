@@ -2,6 +2,7 @@ from app import app
 from flask import request, jsonify
 import spacy
 from spellchecker import SpellChecker
+from app.models import NounObject
 
 nlp = spacy.load("en_core_web_sm")
 spell = SpellChecker()
@@ -12,18 +13,43 @@ def hello_world():
 
 @app.route('/parse', methods=['POST'])
 def parse_story():
-
     data = request.json
     user_story = data['story']
+    main_noun_input = data['main_noun']
     
     doc = nlp(user_story)
-    nouns = [token.text for token in doc if token.pos_ == 'NOUN']
-    verbs = [token.text for token in doc if token.pos_ == 'VERB']
+    main_noun_obj = None
+
+    # Find the main noun in the document
+    for token in doc:
+        if token.text.lower() == main_noun_input.lower():
+            main_noun_obj = NounObject(token.text)
+            break
+
+    if main_noun_obj:
+        for token in doc:
+            # Check for direct and indirect associations with the main noun
+            if token.head.text == main_noun_obj.noun or main_noun_obj.noun in [ancestor.text for ancestor in token.ancestors]:
+                if token.pos_ == 'VERB':
+                    main_noun_obj.add_associated_verb(token.text)
+                elif token.pos_ == 'NOUN' and token.text.lower() != main_noun_obj.noun.lower():
+                    # Check for compound nouns
+                    if token.dep_ == 'compound':
+                        compound_noun = token.text + ' ' + token.head.text
+                        main_noun_obj.add_associated_noun(compound_noun)
+                    else:
+                        main_noun_obj.add_associated_noun(token.text)
+
     response = {
-        "nouns": nouns,
-        "verbs": verbs
+        "nouns": [main_noun_obj.to_dictionary()] if main_noun_obj else []
     }
     return jsonify(response)
+
+
+
+
+
+
     
 
 @app.route('/spell_check', methods=['POST'])
