@@ -14,24 +14,32 @@ def is_valid_english_word(word):
     return word.lower() in set(nltk.corpus.words.words())
 
 def find_associated_verbs(doc, main_noun_token):
-    verbs = set()
+    verb_phrases = set()
     for token in doc:
         if token.pos_ == 'VERB':
-            # Direct association: main noun is a child of the verb or vice versa
-            if main_noun_token in [child for child in token.children] or token.head == main_noun_token:
-                verb_lemma = token.lemma_
-                if is_valid_english_word(verb_lemma):
-                    verbs.add(verb_lemma)
-                else:
-                    verbs.add(token.text)
-            # Indirect association: verb and main noun are in the same sentence
-            elif main_noun_token.sent == token.sent:
-                verb_lemma = token.lemma_
-                if is_valid_english_word(verb_lemma):
-                    verbs.add(verb_lemma)
-                else:
-                    verbs.add(token.text)
-    return list(verbs)
+            verb_lemma = token.lemma_
+            if is_valid_english_word(verb_lemma):
+                verb_phrase = create_verb_phrase(token, verb_lemma)
+                verb_phrases.add(verb_phrase)
+            else:
+                # If lemma is not valid, use the original form of the verb
+                verb_phrases.add(token.text)
+
+    return list(verb_phrases)
+
+def create_verb_phrase(verb_token, verb_lemma):
+
+    # Check for a direct object or a subject complement
+    for child in verb_token.children:
+        if child.dep_ in ['dobj', 'attr', 'acomp']:
+            # Formulate the phrase
+            phrase = verb_lemma + ' ' + child.text
+            return phrase
+
+    # Default to just the verb lemma if no associated object/subject complement is found
+    return verb_lemma
+
+
 
 
 
