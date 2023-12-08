@@ -39,6 +39,8 @@ Install SpaCy:
 Download the English language model:
   Copy code: python -m spacy download en_core_web_sm
 
+Instasll NLTK
+Copy Code: pip install nltk
 
 Final Step : Launch application
 
