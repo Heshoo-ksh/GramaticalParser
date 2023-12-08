@@ -16,12 +16,24 @@ def is_valid_english_word(word):
 def find_associated_verbs(doc, main_noun_token):
     verbs = set()
     for token in doc:
-        if token.pos_ == 'VERB' and (token.head == main_noun_token or main_noun_token in token.ancestors):
-            if is_valid_english_word(token.lemma_):
-                verbs.add(token.lemma_)  
-            else:
-                verbs.add(token.text)
+        if token.pos_ == 'VERB':
+            # Direct association: main noun is a child of the verb or vice versa
+            if main_noun_token in [child for child in token.children] or token.head == main_noun_token:
+                verb_lemma = token.lemma_
+                if is_valid_english_word(verb_lemma):
+                    verbs.add(verb_lemma)
+                else:
+                    verbs.add(token.text)
+            # Indirect association: verb and main noun are in the same sentence
+            elif main_noun_token.sent == token.sent:
+                verb_lemma = token.lemma_
+                if is_valid_english_word(verb_lemma):
+                    verbs.add(verb_lemma)
+                else:
+                    verbs.add(token.text)
     return list(verbs)
+
+
 
 def find_associated_nouns(doc, main_noun_token, compound_nouns):
     nouns = set()
@@ -46,7 +58,6 @@ def filter_nouns(individual_nouns, compound_nouns):
         if not any(noun in cn for cn in compound_nouns):
             filtered_nouns.add(noun)
     return list(filtered_nouns)
-
 
 def find_main_noun(doc, main_noun_input):
     # Attempt to find the main noun as provided in the input
@@ -76,7 +87,6 @@ def find_main_noun(doc, main_noun_input):
         return next(token for token in doc if token.text == main_noun)
 
     return None
-
 
 @app.route('/parse', methods=['POST'])
 def parse_story():
