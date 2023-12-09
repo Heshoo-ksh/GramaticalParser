@@ -40,6 +40,9 @@ Step 5: Instasll NLTK
 Step 6: Install spellchecker:
  Copy Code: pip install pyspellchecker
 
+Step 7: install CORS
+ Copy code: pip install flask-cors
+
 Final Step : Launch application
 
 Run Flask Application:
