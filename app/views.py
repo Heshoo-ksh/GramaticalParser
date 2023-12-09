@@ -4,7 +4,11 @@ from spellchecker import SpellChecker
 from app.models import NounObject
 from spacy.matcher import PhraseMatcher
 import spacy
-import nltk
+import nltk     
+# Import CORS
+from flask_cors import CORS
+
+CORS(app)
 
 nltk.download('words')
 nlp = spacy.load("en_core_web_sm")
