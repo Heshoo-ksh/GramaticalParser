@@ -23,17 +23,14 @@ def find_associated_verbs(doc, main_noun_token):
                 verb_phrases.add(verb_phrase)
             else:
                 verb_phrases.add(token.text)
-
     return list(verb_phrases)
 
 def create_verb_phrase(verb_token, verb_lemma):
-
     # Check for a direct object or a subject complement
     for child in verb_token.children:
         if child.dep_ in ['dobj', 'attr', 'acomp']:
             phrase = verb_lemma + ' ' + child.text
             return phrase
-
     # Default to just the verb lemma if no associated object/subject complement is found
     return verb_lemma
 
@@ -61,10 +58,8 @@ def filter_nouns(individual_nouns, compound_nouns):
             filtered_nouns.add(noun)
     return list(filtered_nouns)
 
-
 def find_main_noun(doc, main_noun_input):
     main_noun_input = main_noun_input.strip().lower()
-
 
     if main_noun_input:
         main_noun_input = spell_check_word(main_noun_input)
@@ -94,9 +89,6 @@ def find_main_noun(doc, main_noun_input):
         return next(token for token in doc if token.text.lower() == main_noun)
 
     return None
-
-
-
 
 @app.route('/parse', methods=['POST'])
 def parse_story():
@@ -128,14 +120,8 @@ def parse_story():
     }
     return jsonify(response)
 
-
-
-
-
-
 @app.route('/spell_check', methods=['POST'])
 def spell_check():
-
     data = request.json
     user_story = data['text']
     corrected_text = spell_check_text(user_story)
@@ -143,7 +129,6 @@ def spell_check():
     return jsonify({"corrected_text": corrected_text})
 
 def spell_check_text(text):
-
     words = text.split()
     corrected_words = [spell.correction(word) for word in words]
     corrected_text = ' '.join(corrected_words)
