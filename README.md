@@ -14,7 +14,7 @@ Prerequisites
 
 Installation
 
-Step 1: Set Up Virtual Environment
+Step 1: Set Up Virtual Environment (optional)
 
 Open PowerShell or your preferred terminal.
 Navigate to your project directory.
@@ -26,21 +26,19 @@ Activate the virtual environment:
 After activation, you should see (venv) at the beginning of your prompt in the terminal.
 
 Step 2: Install Flask
-
-With the virtual environment active, install Flask:
   Powershell Copy code: pip install Flask
 
-Step 3: Implementing the Parsing Endpoint
-
-Install SpaCy and Download Language Model
-
-Install SpaCy:
+Step 3: Install SpaCy
   Copy code: pip install spacy
-Download the English language model:
+  
+Step 4: Download the English language model:
   Copy code: python -m spacy download en_core_web_sm
+  
+Step 5: Instasll NLTK
+  Copy Code: pip install nltk
 
-Instasll NLTK
-Copy Code: pip install nltk
+Step 6: Install spellchecker:
+ Copy Code: pip install pyspellchecker
 
 Final Step : Launch application
 
