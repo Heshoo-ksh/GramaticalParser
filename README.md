@@ -43,6 +43,13 @@ Step 6: Install spellchecker:
 Step 7: install CORS
  Copy code: pip install flask-cors
 
+--------For Testing-------------
+Step 8: Install pytest
+run: C:GramaticalParser\venv\Scripts\python.exe -m pip install pytest (replace with actual path)
+or pip install pytest
+To run tests run: pytest
+
+
 Final Step : Launch application
 
 Run Flask Application:
