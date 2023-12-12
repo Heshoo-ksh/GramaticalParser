@@ -104,7 +104,7 @@ def parse_story():
     main_noun_token = find_main_noun(doc, main_noun_input)
     
     if not main_noun_token:
-        return jsonify({"error": "Main noun not found in the text."}), 400
+        return jsonify({"error": "Story text must be provided!"}), 400
 
     main_noun_obj = NounObject(main_noun_token.text)
     compound_nouns = find_compound_nouns(doc)
